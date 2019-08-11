@@ -1,18 +1,27 @@
 import React, {useState, useEffect} from 'react';
 import axios from 'axios';
 import './App.css';
+import {
+  BrowserRouter as Router,
+  Route,
+  Link,
+  RouteComponentProps
+} from 'react-router-dom'
 
 import PokemonList from './PokemonList';
 import FavList from './FavList';
 import PokemonDetail from './PokemonDetail';
+import Header from './Header'
 import {PokemonObj, PokemonDBObj} from './interfaces';
+
+interface AppProps extends RouteComponentProps<any>, React.Props<any> {}
 
 const App: React.FC = () => {
   // PokemonList
   const[pokemons, setPokemons] = useState([] as PokemonObj[]);
   const[page, setPage] = useState(0);
   useEffect(() => {
-    axios.get(`https://pokeapi.co/api/v2/pokemon/?offset=${20*page}`).then(response => {
+    axios.get(`https://pokeapi.co/api/v2/pokemon/?offset=${60*page}&limit=60`).then(response => {
       console.log(response.data.results);
       setPokemons(response.data.results);
 
@@ -62,38 +71,40 @@ const App: React.FC = () => {
   }
 
   // PokemonDetail
-  const [selectName, setSelectName] = useState('');
-  const [detail, setDetail] = useState(null as any);
-  useEffect(() => {
-    if (selectName !== '') {
-      axios.get(`https://pokeapi.co/api/v2/pokemon/${selectName}`).then(response => {
-        console.log(response.data);
-        setDetail(response.data)
-      })
-    }
-  }, [selectName])
-
   
   return (
     <div className="App">
-      <h1>Pokemons with Django and React hook</h1>
-      <h3>Pokemons #{page*20+1}~{(page+1)*20}</h3>
-      <div className='pagenation'>
-        <button onClick={lastPage}>◀️️</button>
-        <PokemonList  pokemons={pokemons}
-                      setSelectName={setSelectName}
-                      />
-        <button onClick={nextPage}>▶️</button>
-      </div>
-      <FavList  favs={favs}
-                setSelectName={setSelectName}
-                deleteFromFav={deleteFromFav}
-                />
-      <PokemonDetail  detail={detail}
-                      favs={favs}
-                      addToFav={addToFave}
-                      deleteFromFav={deleteFromFav}
-                      />
+      <Router>
+        <h1>Pokemons with Django and React hook</h1>
+        <Header />
+        <Route exact path='/' render={() => (
+          <>
+            <h3>Pokemons #{page*60+1}~{(page+1)*60}</h3>
+            <div className='pagenation'>
+              <button onClick={lastPage}>◀️️</button>
+              <PokemonList  pokemons={pokemons}
+                            />
+              <button onClick={nextPage}>▶️</button>
+            </div>
+          </>
+        )}/>
+
+        <Route exact path='/favs' render={() => (
+          <FavList  favs={favs}
+                    deleteFromFav={deleteFromFav}
+                    />
+        )}/>
+
+        <Route path='/pokemon/:name' render={(props) => (
+          <PokemonDetail  {...props}
+                          favs={favs}
+                          addToFav={addToFave}
+                          deleteFromFav={deleteFromFav}
+                          />
+        )}/>
+      </Router>
+      
+      
     </div>
   );
 }

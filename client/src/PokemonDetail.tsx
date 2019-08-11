@@ -1,15 +1,27 @@
-import React from 'react';
-import {PokemonDBObj} from './interfaces'
+import React, {useState, useEffect} from 'react';
+import {PokemonDBObj} from './interfaces';
+import {RouteComponentProps} from 'react-router-dom';
+import axios from 'axios';
 
-interface IProps {
-  detail: any,
+type RouteParams = {
+  name: string
+}
+
+interface IProps extends RouteComponentProps<RouteParams>{
   favs: PokemonDBObj[],
   addToFav: (name: string) => void,
   deleteFromFav: (name:string) => void
 }
 
-const PokemonDetail: React.FC<IProps> = (props: IProps) => {
-  const detail: any = props.detail;
+const PokemonDetail: React.FC<IProps> = ({match, history, favs, addToFav, deleteFromFav}: IProps) => {
+  let name = match.params.name;
+  const [detail, setDetail] = useState(null as any)
+  useEffect(() => {
+    axios.get(`https://pokeapi.co/api/v2/pokemon/${name}`).then(response => {
+      console.log(response.data);
+      setDetail(response.data)
+    })
+  }, [name])
   let content;
   let button;
   let isFav: boolean = false;
@@ -18,24 +30,25 @@ const PokemonDetail: React.FC<IProps> = (props: IProps) => {
     content = <h4>Click a pokemon to see detail</h4>
   } else {
     
-    for (let pokemon of props.favs) {
-      if (pokemon.name === detail.forms[0].name) {
+    for (let pokemon of favs) {
+      if (pokemon.name === name) {
         isFav = true;
         break;
       }
     }
   
     if (isFav) {
-      button = <button onClick={() => props.deleteFromFav(detail.forms[0].name)}>❤️</button>
+      button = <button onClick={() => deleteFromFav(name)}>❤️</button>
     } else {
-      button = <button onClick={() => props.addToFav(detail.forms[0].name)}>♡</button>
+      button = <button onClick={() => addToFav(name)}>♡</button>
     }
     
     content = <>
       <h3>
-        {detail.forms[0].name}{' '}
+        {name}{' '}
         {button}
       </h3>
+      <button onClick={() => {history.goBack()}}>BACK</button>
       <div className='icon'>
         <img src={detail.sprites.front_default} />
       </div>

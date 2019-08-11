@@ -1,17 +1,22 @@
 import React from 'react';
+import {Link} from 'react-router-dom';
 
 interface IProps {
   favs: any[],
-  setSelectName: React.Dispatch<React.SetStateAction<string>>,
   deleteFromFav: (name:string) => void
 }
 
-const FavList: React.FC<IProps> = (props: IProps) => {
-  const favs: any[] = props.favs; 
+const FavList: React.FC<IProps> = ({favs, deleteFromFav}: IProps) => {
   let content;
   if (favs.length > 0) {
     content = favs.map(pokemon => {
-      return <div onClick={() => props.setSelectName(pokemon.name)}>{pokemon.name} <button onClick={() => props.deleteFromFav(pokemon.name)}>❤️</button></div>
+      return (
+        <div>
+          <Link to={`/pokemon/${pokemon.name}`}>
+            {pokemon.name}
+          </Link> {' '}
+          <button onClick={() => deleteFromFav(pokemon.name)}>❤️</button></div>
+      )
     })
   } else {
     content = <h4>You don't have any favourite pokemons yet!</h4>
