@@ -14,20 +14,16 @@ import PokemonDetail from './PokemonDetail';
 import Header from './Header'
 import {PokemonObj, PokemonDBObj} from './interfaces';
 
-interface AppProps extends RouteComponentProps<any>, React.Props<any> {}
-
 const App: React.FC = () => {
-  // PokemonList
   const[pokemons, setPokemons] = useState([] as PokemonObj[]);
   const[page, setPage] = useState(0);
+  const[favs, setFavs] = useState([] as PokemonDBObj[]);
+  
+  // PokemonList
   useEffect(() => {
     axios.get(`https://pokeapi.co/api/v2/pokemon/?offset=${60*page}&limit=60`).then(response => {
       console.log(response.data.results);
       setPokemons(response.data.results);
-
-      // let urls = response.data.map((pokemon:any) => (
-      //   pokemon.url
-      // ))
     })
   }, [page])
 
@@ -44,7 +40,6 @@ const App: React.FC = () => {
   }
   
   // FavList
-  const[favs, setFavs] = useState([] as PokemonDBObj[]);
   useEffect(() => {
     axios.get('/api/pokemon_favs/').then(response => {
       setFavs(response.data)
@@ -70,8 +65,6 @@ const App: React.FC = () => {
     })
   }
 
-  // PokemonDetail
-  
   return (
     <div className="App">
       <Router>
